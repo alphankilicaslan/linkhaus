@@ -1,0 +1,413 @@
+---
+---
+
+<section class="hero swiss-grid-bg" aria-labelledby="hero-title">
+  <canvas id="architectural-mesh" class="hero-canvas" aria-hidden="true"></canvas>
+
+  <div class="container hero-content">
+    <div class="hero-meta" data-reveal style="--reveal-delay: 40ms">
+      <span class="section-label">HELIOS SMART SYSTEMS // OS 0.1</span>
+      <span class="hero-coords font-mono">41.0082° N — LOCAL CORE :8080</span>
+    </div>
+
+    <div class="hero-main">
+      <h1 id="hero-title" class="hero-title font-display" data-reveal style="--reveal-delay: 120ms">
+        Intelligent<br />
+        Architectural<br />
+        Living.
+      </h1>
+
+      <div class="hero-aside" data-reveal style="--reveal-delay: 220ms">
+        <p class="hero-desc">
+          <strong>LinkHaus</strong> orchestrates lighting, thermal balance, perimeter security, and energy storage
+          through a deterministic, local-first Rust core — rendered in zero-clutter monochrome.
+        </p>
+
+        <div class="hero-cta-row">
+          <a href="#console" class="btn btn-primary" data-magnetic>
+            Open Live Console
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+          <a href="#architecture" class="btn" data-magnetic>
+            System Architecture
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-footer-strip" data-reveal style="--reveal-delay: 300ms">
+      <div class="strip-item">
+        <span class="strip-label font-mono">LATENCY</span>
+        <span class="strip-value font-display">&lt; 1.2 ms</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label font-mono">TOPOLOGY</span>
+        <span class="strip-value font-display">LOCAL MESH</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label font-mono">INTERFACE</span>
+        <span class="strip-value font-display">MONOCHROME UI</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label font-mono">ENGINE</span>
+        <span class="strip-value font-display">RUST / AXUM</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: clamp(2.5rem, 6vh, 4.5rem);
+    padding-bottom: clamp(2rem, 4vh, 3rem);
+    gap: 3rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-coords {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+  }
+
+  .hero-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: end;
+    margin: auto 0;
+  }
+
+  @media (min-width: 960px) {
+    .hero-main {
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 4rem;
+    }
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 7.6vw, 6.25rem);
+    font-weight: 600;
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .hero-desc {
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    color: var(--fg-muted);
+    line-height: 1.65;
+    max-width: 44ch;
+  }
+
+  .hero-desc strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .hero-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+
+  .hero-footer-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background-color: var(--bg-elevated);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+  }
+
+  @media (min-width: 768px) {
+    .hero-footer-strip {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .strip-item {
+    padding: 1.25rem 1.4rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  @media (min-width: 768px) {
+    .strip-item {
+      border-bottom: none;
+    }
+    .strip-item:last-child {
+      border-right: none;
+    }
+  }
+
+  .strip-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    color: var(--fg-muted);
+  }
+
+  .strip-value {
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById('architectural-mesh') as HTMLCanvasElement | null;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    interface MeshNode {
+      x: number;
+      y: number;
+      baseX: number;
+      baseY: number;
+      vx: number;
+      vy: number;
+      phase: number;
+      hub: boolean;
+    }
+
+    interface Pulse {
+      from: number;
+      to: number;
+      t: number;
+      speed: number;
+    }
+
+    let width = 0;
+    let height = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let nodes: MeshNode[] = [];
+    let pulses: Pulse[] = [];
+    let pointer = { x: -9999, y: -9999, active: false };
+
+    function getThemeColors() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      return isLight
+        ? {
+            node: 'rgba(5, 5, 5, 0.55)',
+            hub: 'rgba(5, 5, 5, 0.9)',
+            line: 'rgba(5, 5, 5, 0.11)',
+            pulse: 'rgba(5, 5, 5, 0.85)',
+          }
+        : {
+            node: 'rgba(255, 255, 255, 0.45)',
+            hub: 'rgba(255, 255, 255, 0.92)',
+            line: 'rgba(255, 255, 255, 0.10)',
+            pulse: 'rgba(255, 255, 255, 0.9)',
+          };
+    }
+
+    function buildNodes() {
+      const rect = canvas!.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas!.width = Math.floor(width * dpr);
+      canvas!.height = Math.floor(height * dpr);
+      ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const cols = Math.max(4, Math.floor(width / 200));
+      const rows = Math.max(3, Math.floor(height / 180));
+      nodes = [];
+      pulses = [];
+
+      for (let r = 0; r <= rows; r++) {
+        for (let c = 0; c <= cols; c++) {
+          const jitterX = (Math.random() - 0.5) * 70;
+          const jitterY = (Math.random() - 0.5) * 60;
+          const bx = (c / cols) * width + jitterX;
+          const by = (r / rows) * height + jitterY;
+          nodes.push({
+            x: bx,
+            y: by,
+            baseX: bx,
+            baseY: by,
+            vx: (Math.random() - 0.5) * 0.25,
+            vy: (Math.random() - 0.5) * 0.25,
+            phase: Math.random() * Math.PI * 2,
+            hub: (r + c) % 4 === 0,
+          });
+        }
+      }
+    }
+
+    function spawnPulse() {
+      if (nodes.length < 2 || pulses.length > 10) return;
+      const from = Math.floor(Math.random() * nodes.length);
+      const a = nodes[from];
+      let best = -1;
+      let bestDist = 260;
+      for (let i = 0; i < nodes.length; i++) {
+        if (i === from) continue;
+        const d = Math.hypot(nodes[i].x - a.x, nodes[i].y - a.y);
+        if (d > 40 && d < bestDist) {
+          bestDist = d;
+          best = i;
+        }
+      }
+      if (best !== -1) {
+        pulses.push({ from, to: best, t: 0, speed: 0.014 + Math.random() * 0.012 });
+      }
+    }
+
+    function drawFrame(time: number) {
+      if (!ctx) return;
+      const colors = getThemeColors();
+      ctx.clearRect(0, 0, width, height);
+
+      const maxLinkDist = 215;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        if (!prefersReducedMotion) {
+          n.x = n.baseX + Math.sin(time * 0.0006 + n.phase) * 14;
+          n.y = n.baseY + Math.cos(time * 0.0005 + n.phase) * 14;
+
+          if (pointer.active) {
+            const dx = pointer.x - n.x;
+            const dy = pointer.y - n.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < 180 && dist > 1) {
+              const force = (1 - dist / 180) * 18;
+              n.x -= (dx / dist) * force;
+              n.y -= (dy / dist) * force;
+            }
+          }
+        }
+      }
+
+      // Draw architectural connections
+      ctx.lineWidth = 1;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < maxLinkDist) {
+            const alpha = (1 - dist / maxLinkDist) * 0.85;
+            ctx.strokeStyle = colors.line;
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      ctx.globalAlpha = 1;
+
+      // Draw nodes
+      for (const n of nodes) {
+        if (n.hub) {
+          ctx.strokeStyle = colors.hub;
+          ctx.strokeRect(n.x - 4, n.y - 4, 8, 8);
+          ctx.fillStyle = colors.hub;
+          ctx.fillRect(n.x - 1.5, n.y - 1.5, 3, 3);
+        } else {
+          ctx.fillStyle = colors.node;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Draw kinetic signal pulses
+      if (!prefersReducedMotion) {
+        if (Math.random() < 0.045) spawnPulse();
+        for (let i = pulses.length - 1; i >= 0; i--) {
+          const p = pulses[i];
+          p.t += p.speed;
+          if (p.t >= 1) {
+            pulses.splice(i, 1);
+            continue;
+          }
+          const a = nodes[p.from];
+          const b = nodes[p.to];
+          const px = a.x + (b.x - a.x) * p.t;
+          const py = a.y + (b.y - a.y) * p.t;
+          ctx.fillStyle = colors.pulse;
+          ctx.fillRect(px - 2, py - 2, 4, 4);
+        }
+      }
+
+      if (!prefersReducedMotion) {
+        requestAnimationFrame(drawFrame);
+      }
+    }
+
+    const heroSection = canvas.parentElement;
+    heroSection?.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+      pointer.active = true;
+    });
+    heroSection?.addEventListener('mouseleave', () => {
+      pointer.active = false;
+    });
+
+    window.addEventListener('resize', () => {
+      buildNodes();
+      if (prefersReducedMotion) drawFrame(0);
+    });
+
+    window.addEventListener('linkhaus:theme-change', () => {
+      if (prefersReducedMotion) drawFrame(0);
+    });
+
+    buildNodes();
+    requestAnimationFrame(drawFrame);
+  }
+</script>

@@ -1,0 +1,132 @@
+---
+const pillars = [
+  {
+    index: '01',
+    tag: 'LOCAL-FIRST CORE',
+    title: 'Deterministic Rust Execution',
+    body: 'Every state transition, scene preset, and telemetry frame is processed locally in memory with Axum and Tokio — zero cloud round-trips, zero external telemetry leakage.',
+  },
+  {
+    index: '02',
+    tag: 'SWISS MONOCHROME',
+    title: 'Zero-Clutter Visual Clarity',
+    body: 'Engineered in pure #050505 obsidian and #ffffff alabaster with hairline borders. High-contrast typography eliminates cognitive noise in both day and night environments.',
+  },
+  {
+    index: '03',
+    tag: 'SUB-MILLISECOND BUS',
+    title: 'Unified Spatial Topology',
+    body: 'Lighting arrays, thermal diffusers, perimeter locks, and solar storage nodes share a single typed contract across every architectural zone.',
+  },
+  {
+    index: '04',
+    tag: 'RESILIENT FALLBACK',
+    title: 'Graceful Edge Continuity',
+    body: 'Real-time health polling monitors the local core at 127.0.0.1:8080, seamlessly surfacing live status or falling back to an interactive diagnostic state.',
+  },
+];
+---
+
+<section id="architecture" class="arch-section swiss-grid-bg">
+  <div class="container">
+    <div class="arch-head" data-reveal>
+      <span class="section-label">02 // SYSTEM ARCHITECTURE</span>
+      <h2 class="arch-title font-display">Engineered for quiet precision.</h2>
+    </div>
+
+    <div class="pillars-grid">
+      {
+        pillars.map((p, idx) => (
+          <article class="pillar-card" data-reveal style={`--reveal-delay: ${idx * 75}ms`}>
+            <div class="pillar-top font-mono">
+              <span class="pillar-idx">{p.index}</span>
+              <span class="pillar-tag">{p.tag}</span>
+            </div>
+            <h3 class="pillar-title font-display">{p.title}</h3>
+            <p class="pillar-body">{p.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .arch-section {
+    padding: clamp(4rem, 8vw, 7rem) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .arch-head {
+    margin-bottom: 3rem;
+  }
+
+  .arch-title {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.06;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .pillars-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .pillar-card {
+    padding: clamp(1.75rem, 3vw, 2.35rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background-color: var(--bg-elevated);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition:
+      transform 0.32s var(--ease-spring),
+      border-color 0.25s ease,
+      box-shadow 0.32s var(--ease-spring);
+  }
+
+  .pillar-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .pillar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: var(--fg-muted);
+  }
+
+  .pillar-idx {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .pillar-title {
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .pillar-body {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+    max-width: 52ch;
+  }
+</style>

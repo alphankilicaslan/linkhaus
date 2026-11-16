@@ -1,0 +1,83 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'LinkHaus — Intelligent Architectural Living | Helios Smart Systems',
+  description = 'LinkHaus by Helios Smart Systems. Precision monochrome smart-home orchestration powered by a local-first Rust core.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Crect width='24' height='24' fill='%23050505'/%3E%3Crect x='3' y='3' width='18' height='18' stroke='%23ffffff' stroke-width='1.5'/%3E%3Cline x1='3' y1='12' x2='21' y2='12' stroke='%23ffffff' stroke-width='1.2'/%3E%3Cline x1='12' y1='3' x2='12' y2='21' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23ffffff'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('linkhaus-theme');
+          const theme = saved === 'light' || saved === 'dark' ? saved : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      // Scroll-triggered reveal observer
+      const revealNodes = document.querySelectorAll<HTMLElement>('[data-reveal]');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+        );
+        revealNodes.forEach((el) => observer.observe(el));
+      } else {
+        revealNodes.forEach((el) => el.classList.add('is-visible'));
+      }
+
+      // Subtle magnetic hover micro-interaction
+      const magneticEls = document.querySelectorAll<HTMLElement>('[data-magnetic]');
+      magneticEls.forEach((el) => {
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const dx = (e.clientX - (rect.left + rect.width / 2)) * 0.14;
+          const dy = (e.clientY - (rect.top + rect.height / 2)) * 0.14;
+          el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+        });
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = '';
+        });
+      });
+    </script>
+  </body>
+</html>

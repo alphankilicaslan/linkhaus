@@ -1,0 +1,1980 @@
+---
+---
+
+<section id="console" class="console-section">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div>
+        <span class="section-label">01 // TELEMETRY &amp; CONTROL</span>
+        <h2 class="section-title font-display">Live Architectural Console</h2>
+      </div>
+      <div class="head-controls">
+        <span id="console-mode-pill" class="mode-pill font-mono" data-mode="syncing">
+          SYNCING CORE...
+        </span>
+        <button id="refresh-overview-btn" type="button" class="btn btn-sm" data-magnetic>
+          Sync State
+        </button>
+      </div>
+    </div>
+
+    <div id="offline-banner" class="offline-banner font-mono" hidden>
+      <span>
+        CORE UNREACHABLE AT <strong>127.0.0.1:8080</strong> — RUNNING IN LOCAL MONOCHROME DEMO MODE
+      </span>
+      <button id="retry-connect-btn" type="button" class="retry-link">RETRY</button>
+    </div>
+
+    <!-- Telemetry Metrics Strip -->
+    <div class="metrics-grid glass-surface" data-reveal style="--reveal-delay: 80ms">
+      <div class="metric-cell">
+        <span class="metric-label font-mono">ACTIVE NODES</span>
+        <span class="metric-value font-display" id="metric-active">-- / --</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-label font-mono">TOTAL LOAD</span>
+        <span class="metric-value font-display" id="metric-power">-- W</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-label font-mono">CORE UPTIME</span>
+        <span class="metric-value font-display" id="metric-uptime">--</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-label font-mono">ACTIVE SCENE</span>
+        <span class="metric-value font-display" id="metric-scene">CUSTOM</span>
+      </div>
+    </div>
+
+    <!-- Scene Orchestration Bar -->
+    <div id="scenes" class="scenes-block" data-reveal style="--reveal-delay: 140ms">
+      <div class="block-header">
+        <span class="font-mono block-title">SCENE PRESETS</span>
+        <span class="font-mono block-hint">ONE-TOUCH ENVIRONMENT ORCHESTRATION</span>
+      </div>
+      <div id="scenes-grid" class="scenes-grid" role="group" aria-label="Smart home scenes">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Room Filter & Devices -->
+    <div class="devices-block" data-reveal style="--reveal-delay: 180ms">
+      <div class="devices-toolbar">
+        <div id="room-tabs" class="room-tabs" role="tablist" aria-label="Filter devices by room">
+          <button type="button" class="room-tab is-active font-mono" data-room="all" role="tab" aria-selected="true">
+            ALL ZONES
+          </button>
+        </div>
+        <div class="toolbar-right">
+          <span id="device-count-label" class="font-mono block-hint">0 NODES</span>
+          <button id="open-add-device-btn" type="button" class="btn btn-primary btn-sm">
+            + Add Device
+          </button>
+        </div>
+      </div>
+
+      <div id="devices-grid" class="devices-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Autonomous IF/THEN Rules Engine -->
+    <div id="automations" class="automations-block" data-reveal style="--reveal-delay: 220ms">
+      <div class="devices-toolbar">
+        <div>
+          <span class="font-mono block-title">AUTONOMOUS IF / THEN RULES</span>
+          <p class="block-sub">Trigger multi-device cascades automatically when node states change.</p>
+        </div>
+        <div class="toolbar-right">
+          <span id="automation-count-label" class="font-mono block-hint">0 RULES</span>
+          <button id="open-add-automation-btn" type="button" class="btn btn-primary btn-sm">
+            + New Automation
+          </button>
+        </div>
+      </div>
+
+      <div id="automations-grid" class="automations-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Device Modal Sheet -->
+<div id="add-device-modal" class="lh-modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="add-device-title">
+  <div class="lh-modal">
+    <div class="lh-modal-head">
+      <div>
+        <span class="font-mono modal-eyebrow">NODE REGISTRATION</span>
+        <h3 id="add-device-title" class="font-display modal-title">Add Smart Device</h3>
+      </div>
+      <button type="button" class="modal-close-btn" data-close-modal="add-device-modal" aria-label="Close modal">✕</button>
+    </div>
+
+    <form id="add-device-form" class="lh-form">
+      <div class="form-row">
+        <label class="form-label" for="dev-name-input">Device Name</label>
+        <input id="dev-name-input" class="form-input" type="text" placeholder="e.g. Studio Floor Lamp" required />
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label" for="dev-room-select">Room / Zone</label>
+          <select id="dev-room-select" class="form-select" required></select>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="dev-kind-select">Device Type</label>
+          <select id="dev-kind-select" class="form-select" required>
+            <option value="lighting">Lighting</option>
+            <option value="climate">Climate (AC)</option>
+            <option value="switch">Switch / Button</option>
+            <option value="security">Security</option>
+            <option value="energy">Energy</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dynamic Type Settings -->
+      <div id="dev-opts-lighting" class="form-subpanel">
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label" for="dev-light-level">Initial Brightness (%)</label>
+            <input id="dev-light-level" class="form-input" type="number" min="0" max="100" value="80" />
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="dev-light-kelvin">Color Temp (K)</label>
+            <input id="dev-light-kelvin" class="form-input" type="number" min="2700" max="6500" step="100" value="3500" />
+          </div>
+        </div>
+      </div>
+
+      <div id="dev-opts-climate" class="form-subpanel" hidden>
+        <div class="form-grid-3">
+          <div class="form-row">
+            <label class="form-label" for="dev-climate-temp">Target (°C)</label>
+            <input id="dev-climate-temp" class="form-input" type="number" min="16" max="30" step="1" value="22" />
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="dev-climate-mode">Mode</label>
+            <select id="dev-climate-mode" class="form-select">
+              <option value="cool">Cool</option>
+              <option value="heat">Heat</option>
+              <option value="auto">Auto</option>
+              <option value="fan">Fan</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="dev-climate-fan">Fan Speed</label>
+            <select id="dev-climate-fan" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="dev-opts-switch" class="form-subpanel" hidden>
+        <div class="form-row">
+          <label class="form-label" for="dev-switch-mode">Button Mode</label>
+          <select id="dev-switch-mode" class="form-select">
+            <option value="toggle">Toggle</option>
+            <option value="momentary">Momentary</option>
+            <option value="scene">Scene</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lh-modal-actions">
+        <button type="button" class="btn btn-sm" data-close-modal="add-device-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Create Device</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- New Automation Modal Sheet -->
+<div id="add-automation-modal" class="lh-modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="add-auto-title">
+  <div class="lh-modal lh-modal-lg">
+    <div class="lh-modal-head">
+      <div>
+        <span class="font-mono modal-eyebrow">IF / THEN BUILDER</span>
+        <h3 id="add-auto-title" class="font-display modal-title">New Autonomous Rule</h3>
+      </div>
+      <button type="button" class="modal-close-btn" data-close-modal="add-automation-modal" aria-label="Close modal">✕</button>
+    </div>
+
+    <form id="add-automation-form" class="lh-form">
+      <div class="form-row">
+        <label class="form-label" for="auto-name-input">Rule Name</label>
+        <input id="auto-name-input" class="form-input" type="text" placeholder="e.g. Evening All-On Cascade" required />
+      </div>
+
+      <div class="form-subpanel">
+        <span class="font-mono subpanel-badge">IF TRIGGER</span>
+        <div class="form-grid-3">
+          <div class="form-row">
+            <label class="form-label" for="auto-trigger-device">Trigger Device</label>
+            <select id="auto-trigger-device" class="form-select" required></select>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="auto-trigger-cond">Condition</label>
+            <select id="auto-trigger-cond" class="form-select" required>
+              <option value="turns_on">Turns ON</option>
+              <option value="turns_off">Turns OFF</option>
+              <option value="level_above">Level Above (%)</option>
+              <option value="temp_above">Temp Above (°C)</option>
+            </select>
+          </div>
+          <div id="auto-trigger-val-wrap" class="form-row" hidden>
+            <label class="form-label" for="auto-trigger-val">Threshold</label>
+            <input id="auto-trigger-val" class="form-input" type="number" step="1" value="50" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-subpanel">
+        <div class="subpanel-head">
+          <span class="font-mono subpanel-badge">THEN ACTIONS</span>
+          <button id="add-action-row-btn" type="button" class="pill-btn">+ Add Action</button>
+        </div>
+        <div id="auto-actions-container" class="actions-builder-list"></div>
+      </div>
+
+      <div class="lh-modal-actions">
+        <button type="button" class="btn btn-sm" data-close-modal="add-automation-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Save Automation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .console-section {
+    padding: clamp(4rem, 8vw, 6.5rem) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.05;
+  }
+
+  .head-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .mode-pill {
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background-color: var(--bg-elevated);
+    color: var(--fg-muted);
+  }
+
+  .mode-pill[data-mode='live'] {
+    color: var(--fg);
+    border-color: var(--border-strong);
+  }
+
+  .btn-sm {
+    padding: 0.55rem 1.05rem;
+    font-size: 0.76rem;
+  }
+
+  .offline-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius-inner);
+    border: 1px dashed var(--border-strong);
+    background-color: var(--bg-elevated);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--fg-muted);
+  }
+
+  .offline-banner[hidden] {
+    display: none;
+  }
+
+  .offline-banner strong {
+    color: var(--fg);
+  }
+
+  .retry-link {
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+  }
+
+  .retry-link:hover {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    overflow: hidden;
+    margin-bottom: 2.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .metrics-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .metric-cell {
+    padding: 1.4rem 1.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  @media (min-width: 768px) {
+    .metric-cell {
+      border-bottom: none;
+    }
+    .metric-cell:last-child {
+      border-right: none;
+    }
+  }
+
+  .metric-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+  }
+
+  .metric-value {
+    font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .block-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .block-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .block-sub {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin-top: 0.25rem;
+  }
+
+  .block-hint {
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+  }
+
+  .scenes-block {
+    margin-bottom: 3rem;
+  }
+
+  .scenes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  :global(.scene-card) {
+    text-align: left;
+    padding: 1.35rem 1.45rem;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background-color: var(--bg-elevated);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+    color: var(--fg);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    transition:
+      transform 0.3s var(--ease-spring),
+      border-color 0.25s ease,
+      background-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.3s var(--ease-spring);
+  }
+
+  :global(.scene-card:hover) {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  :global(.scene-card.is-active) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  :global(.scene-card-top) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  :global(.scene-name) {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  :global(.scene-state) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid currentColor;
+    opacity: 0.85;
+  }
+
+  :global(.scene-desc) {
+    font-size: 0.85rem;
+    line-height: 1.45;
+    opacity: 0.78;
+  }
+
+  .devices-block {
+    margin-bottom: 3.5rem;
+  }
+
+  .devices-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.35rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .room-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  :global(.room-tab) {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    padding: 0.45rem 0.95rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.24s var(--ease-spring);
+  }
+
+  :global(.room-tab:hover) {
+    border-color: var(--fg);
+    color: var(--fg);
+  }
+
+  :global(.room-tab.is-active) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  .devices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1.25rem;
+  }
+
+  :global(.device-card) {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background-color: var(--bg-elevated);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.15rem;
+    transition:
+      transform 0.32s var(--ease-spring),
+      border-color 0.25s ease,
+      box-shadow 0.32s var(--ease-spring);
+  }
+
+  :global(.device-card:hover) {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+
+  :global(.device-card.is-on) {
+    border-color: var(--border-strong);
+  }
+
+  :global(.device-top) {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  :global(.device-identity) {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  :global(.device-icon-badge) {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-subtle);
+    color: var(--fg-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.28s var(--ease-spring);
+  }
+
+  :global(.device-card.is-on .device-icon-badge) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  :global(.device-meta) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  :global(.device-kind) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  :global(.device-name) {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global(.device-top-actions) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  :global(.icon-trash-btn) {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--fg-faint);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  :global(.icon-trash-btn:hover) {
+    color: var(--fg);
+    border-color: var(--border);
+    background-color: var(--bg-subtle);
+  }
+
+  /* Apple iOS/macOS Sliding Toggle Switch */
+  :global(.device-toggle) {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    border-radius: 9999px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-subtle);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.28s var(--ease-spring), border-color 0.28s ease;
+  }
+
+  :global(.device-toggle::after) {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: var(--fg-muted);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+    transition: transform 0.28s var(--ease-spring), background-color 0.25s ease;
+  }
+
+  :global(.device-toggle[aria-pressed='true']) {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  :global(.device-toggle[aria-pressed='true']::after) {
+    transform: translateX(22px);
+    background-color: var(--accent-fg);
+  }
+
+  /* Dedicated Device Controls */
+  :global(.device-controls) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  :global(.climate-temp-row) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-inner);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+  }
+
+  :global(.climate-temp-display) {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  :global(.stepper-group) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  :global(.stepper-btn) {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-elevated);
+    color: var(--fg);
+    font-size: 1rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+  }
+
+  :global(.stepper-btn:hover) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  :global(.segmented-row) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  :global(.control-caption) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--fg-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  :global(.pill-group) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  :global(.pill-opt) {
+    flex: 1 1 auto;
+    padding: 0.38rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-subtle);
+    color: var(--fg-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: capitalize;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s var(--ease-spring);
+  }
+
+  :global(.pill-opt:hover) {
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+
+  :global(.pill-opt.is-selected) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  :global(.device-slider-wrap) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  :global(.switch-action-pill) {
+    width: 100%;
+    padding: 0.62rem 1rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-subtle);
+    color: var(--fg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.24s var(--ease-spring);
+  }
+
+  :global(.switch-action-pill.is-active) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  :global(.device-bottom) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--fg-muted);
+  }
+
+  :global(.device-status-text) {
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* Automations Grid */
+  .automations-block {
+    margin-top: 1rem;
+  }
+
+  .automations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+  }
+
+  :global(.auto-card) {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background-color: var(--bg-elevated);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft);
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  :global(.auto-card-top) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  :global(.auto-name) {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  :global(.auto-flow) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.85rem;
+    border-radius: var(--radius-inner);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+  }
+
+  :global(.auto-chip-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  :global(.auto-badge) {
+    padding: 0.16rem 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  :global(.auto-action-tag) {
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-elevated);
+    font-size: 0.68rem;
+  }
+
+  :global(.auto-card-footer) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  :global(.pill-btn) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-subtle);
+    color: var(--fg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+  }
+
+  :global(.pill-btn:hover) {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  /* Modals */
+  .lh-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+  }
+
+  .lh-modal-backdrop[hidden] {
+    display: none;
+  }
+
+  .lh-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: var(--bg-modal);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--border-strong);
+    border-radius: 24px;
+    box-shadow: var(--shadow-card);
+    padding: 1.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+  }
+
+  .lh-modal-lg {
+    max-width: 640px;
+  }
+
+  .lh-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .modal-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--fg-muted);
+  }
+
+  .modal-title {
+    font-size: 1.45rem;
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  .modal-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-subtle);
+    color: var(--fg);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lh-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+  }
+
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-inner);
+    border: 1px solid var(--border-strong);
+    background-color: var(--bg-subtle);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 0.875rem;
+    outline: none;
+  }
+
+  .form-select option {
+    background-color: var(--bg-solid);
+    color: var(--fg);
+  }
+
+  .form-subpanel {
+    padding: 1rem;
+    border-radius: var(--radius-inner);
+    border: 1px solid var(--border);
+    background-color: var(--bg-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .form-subpanel[hidden] {
+    display: none;
+  }
+
+  .subpanel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .subpanel-badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--fg-muted);
+  }
+
+  .actions-builder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  :global(.action-builder-row) {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .lh-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    margin-top: 0.5rem;
+  }
+</style>
+
+<script>
+  import {
+    activateScene,
+    createAutomation,
+    createDevice,
+    deleteAutomation,
+    deleteDevice,
+    fetchOverview,
+    OFFLINE_FALLBACK_OVERVIEW,
+    runAutomation,
+    toggleAutomation,
+    toggleDevice,
+    updateDevice,
+    type AutomationRule,
+    type CreateDeviceRequest,
+    type Device,
+    type OverviewResponse,
+    type RuleAction,
+    type Scene,
+    type UpdateDeviceRequest,
+  } from '../lib/api';
+  import { getDeviceIconSvg, PLAY_ICON_SVG, TRASH_ICON_SVG } from '../lib/icons';
+
+  const isSceneActive = (scene: Scene): boolean => Boolean(scene.is_active ?? scene.active);
+
+  let state: OverviewResponse = structuredClone(OFFLINE_FALLBACK_OVERVIEW);
+  let isLive = false;
+  let activeRoom = 'all';
+  const sliderTimers = new Map<string, number>();
+
+  const modePill = document.getElementById('console-mode-pill');
+  const offlineBanner = document.getElementById('offline-banner');
+  const metricActive = document.getElementById('metric-active');
+  const metricPower = document.getElementById('metric-power');
+  const metricUptime = document.getElementById('metric-uptime');
+  const metricScene = document.getElementById('metric-scene');
+  const scenesGrid = document.getElementById('scenes-grid');
+  const roomTabs = document.getElementById('room-tabs');
+  const devicesGrid = document.getElementById('devices-grid');
+  const deviceCountLabel = document.getElementById('device-count-label');
+  const automationsGrid = document.getElementById('automations-grid');
+  const automationCountLabel = document.getElementById('automation-count-label');
+
+  function formatUptime(secs: number): string {
+    if (!secs || secs <= 0) return 'DEMO';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+  function recomputeLocalMetrics() {
+    const activeCount = state.devices.filter((d) => d.is_on).length;
+    const totalPower = state.devices.reduce((acc, d) => acc + (d.is_on ? d.power_watts : 0), 0);
+    state.metrics.active_devices = activeCount;
+    state.metrics.total_devices = state.devices.length;
+    state.metrics.power_watts = totalPower;
+  }
+
+  function getDeviceName(deviceId: string): string {
+    return state.devices.find((d) => d.id === deviceId)?.name ?? deviceId;
+  }
+
+  function getRoomName(roomId: string): string {
+    return state.rooms.find((r) => r.id === roomId)?.name ?? roomId;
+  }
+
+  function applyRuleActionsLocally(actions: RuleAction[]) {
+    for (const act of actions) {
+      state.devices = state.devices.map((d) => {
+        if (d.id !== act.target_device_id) return d;
+        if (act.action === 'turn_on') return { ...d, is_on: true };
+        if (act.action === 'turn_off') return { ...d, is_on: false };
+        if (act.action === 'toggle') return { ...d, is_on: !d.is_on };
+        if (act.action === 'set_level' && typeof act.value === 'number') {
+          return { ...d, is_on: true, level: act.value };
+        }
+        if (act.action === 'set_temp' && typeof act.value === 'number') {
+          return { ...d, is_on: true, temperature_c: act.value };
+        }
+        return d;
+      });
+    }
+  }
+
+  function evaluateLocalAutomations(prev: Device, next: Device) {
+    const rules = state.automations ?? [];
+    for (const rule of rules) {
+      if (!rule.enabled || rule.trigger_device_id !== next.id) continue;
+      let matched = false;
+      if (rule.trigger_condition === 'turns_on' && !prev.is_on && next.is_on) matched = true;
+      if (rule.trigger_condition === 'turns_off' && prev.is_on && !next.is_on) matched = true;
+      if (
+        rule.trigger_condition === 'level_above' &&
+        typeof next.level === 'number' &&
+        typeof rule.trigger_value === 'number' &&
+        next.level > rule.trigger_value
+      ) {
+        matched = true;
+      }
+      if (
+        rule.trigger_condition === 'temp_above' &&
+        typeof next.temperature_c === 'number' &&
+        typeof rule.trigger_value === 'number' &&
+        next.temperature_c > rule.trigger_value
+      ) {
+        matched = true;
+      }
+      if (matched) {
+        applyRuleActionsLocally(rule.actions);
+      }
+    }
+  }
+
+  function renderMetrics() {
+    if (metricActive) {
+      metricActive.textContent = `${state.metrics.active_devices} / ${state.metrics.total_devices}`;
+    }
+    if (metricPower) {
+      metricPower.textContent = `${state.metrics.power_watts} W`;
+    }
+    if (metricUptime) {
+      metricUptime.textContent = isLive ? formatUptime(state.metrics.uptime_secs) : 'LOCAL DEMO';
+    }
+    if (metricScene) {
+      const currentScene = state.scenes.find(isSceneActive);
+      metricScene.textContent = currentScene ? currentScene.name.toUpperCase() : 'CUSTOM';
+    }
+  }
+
+  function renderScenes() {
+    if (!scenesGrid) return;
+    scenesGrid.innerHTML = '';
+
+    for (const scene of state.scenes) {
+      const active = isSceneActive(scene);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `scene-card${active ? ' is-active' : ''}`;
+      btn.setAttribute('data-scene-id', scene.id);
+      btn.innerHTML = `
+        <div class="scene-card-top">
+          <span class="scene-name">${scene.name}</span>
+          <span class="scene-state">${active ? 'ACTIVE' : 'ACTIVATE'}</span>
+        </div>
+        <p class="scene-desc">${scene.description}</p>
+      `;
+
+      btn.addEventListener('click', async () => {
+        if (isLive) {
+          try {
+            state = await activateScene(scene.id);
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        } else {
+          state.scenes = state.scenes.map((s) => ({
+            ...s,
+            is_active: s.id === scene.id,
+            active: s.id === scene.id,
+          }));
+          if (scene.id === 'away-guard') {
+            state.devices = state.devices.map((d) => ({
+              ...d,
+              is_on: d.kind.toLowerCase() === 'security',
+            }));
+          } else if (scene.id === 'monochrome-evening') {
+            state.devices = state.devices.map((d) =>
+              d.kind.toLowerCase() === 'lighting' ? { ...d, is_on: true, level: 35, color_temp_k: 2700 } : d
+            );
+          } else {
+            state.devices = state.devices.map((d) =>
+              d.kind.toLowerCase() === 'lighting' ? { ...d, is_on: true, level: 85, color_temp_k: 4500 } : d
+            );
+          }
+          recomputeLocalMetrics();
+        }
+        renderAll();
+      });
+
+      scenesGrid.appendChild(btn);
+    }
+  }
+
+  function renderRooms() {
+    if (!roomTabs) return;
+    roomTabs.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = `room-tab font-mono${activeRoom === 'all' ? ' is-active' : ''}`;
+    allBtn.textContent = 'ALL ZONES';
+    allBtn.addEventListener('click', () => {
+      activeRoom = 'all';
+      renderRooms();
+      renderDevices();
+    });
+    roomTabs.appendChild(allBtn);
+
+    for (const room of state.rooms) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `room-tab font-mono${activeRoom === room.id ? ' is-active' : ''}`;
+      btn.textContent = room.name.toUpperCase();
+      btn.addEventListener('click', () => {
+        activeRoom = room.id;
+        renderRooms();
+        renderDevices();
+      });
+      roomTabs.appendChild(btn);
+    }
+  }
+
+  async function patchAndSync(device: Device, patch: UpdateDeviceRequest) {
+    const prev = { ...device };
+    const optimistic = { ...device, ...patch };
+    if (!isLive) {
+      updateLocalDevice(optimistic);
+      evaluateLocalAutomations(prev, optimistic);
+      recomputeLocalMetrics();
+      renderAll();
+      return;
+    }
+
+    updateLocalDevice(optimistic);
+    try {
+      const updated = await updateDevice(device.id, patch);
+      updateLocalDevice(updated);
+      await syncOverviewQuietly();
+    } catch {
+      isLive = false;
+      updateConnectionUI();
+    }
+  }
+
+  function buildDedicatedControls(device: Device): string {
+    const kind = device.kind.toLowerCase();
+
+    if (kind === 'climate') {
+      const temp = Math.round(device.temperature_c ?? 22);
+      const mode = (device.climate_mode ?? 'cool').toLowerCase();
+      const fan = (device.fan_speed ?? 'medium').toLowerCase();
+      const modes = ['cool', 'heat', 'auto', 'fan'];
+      const fans = [
+        { id: 'low', label: 'Low' },
+        { id: 'medium', label: 'Med' },
+        { id: 'high', label: 'High' },
+      ];
+      return `
+        <div class="device-controls">
+          <div class="climate-temp-row">
+            <div>
+              <span class="control-caption">TARGET TEMP</span>
+              <span class="climate-temp-display">${temp}°C</span>
+            </div>
+            <div class="stepper-group">
+              <button type="button" class="stepper-btn" data-temp-delta="-1" aria-label="Decrease temperature">−</button>
+              <button type="button" class="stepper-btn" data-temp-delta="1" aria-label="Increase temperature">+</button>
+            </div>
+          </div>
+          <div class="segmented-row">
+            <span class="control-caption">MODE</span>
+            <div class="pill-group">
+              ${modes
+                .map(
+                  (m) =>
+                    `<button type="button" class="pill-opt${mode === m ? ' is-selected' : ''}" data-climate-mode="${m}">${m}</button>`
+                )
+                .join('')}
+            </div>
+          </div>
+          <div class="segmented-row">
+            <span class="control-caption">FAN SPEED</span>
+            <div class="pill-group">
+              ${fans
+                .map(
+                  (f) =>
+                    `<button type="button" class="pill-opt${fan === f.id ? ' is-selected' : ''}" data-fan-speed="${f.id}">${f.label}</button>`
+                )
+                .join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (kind === 'lighting') {
+      const levelVal = device.level ?? 75;
+      const kelvin = device.color_temp_k ?? 3400;
+      return `
+        <div class="device-controls">
+          <div class="device-slider-wrap">
+            <div class="control-caption">
+              <span>BRIGHTNESS</span>
+              <span class="device-level-val">${levelVal}%</span>
+            </div>
+            <input type="range" min="0" max="100" value="${levelVal}" class="lh-slider" data-slider="level" ${!device.is_on ? 'disabled' : ''} />
+          </div>
+          <div class="device-slider-wrap">
+            <div class="control-caption">
+              <span>COLOR TEMP</span>
+              <span class="device-kelvin-val">${kelvin}K</span>
+            </div>
+            <input type="range" min="2700" max="6500" step="100" value="${kelvin}" class="lh-slider" data-slider="kelvin" ${!device.is_on ? 'disabled' : ''} />
+            <div class="pill-group">
+              <button type="button" class="pill-opt${kelvin <= 3000 ? ' is-selected' : ''}" data-kelvin-preset="2700">2700K</button>
+              <button type="button" class="pill-opt${kelvin > 3000 && kelvin < 5200 ? ' is-selected' : ''}" data-kelvin-preset="4000">4000K</button>
+              <button type="button" class="pill-opt${kelvin >= 5200 ? ' is-selected' : ''}" data-kelvin-preset="6500">6500K</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (kind === 'switch') {
+      const bMode = (device.button_mode ?? 'toggle').toLowerCase();
+      const modes = ['toggle', 'momentary', 'scene'];
+      return `
+        <div class="device-controls">
+          <div class="segmented-row">
+            <span class="control-caption">BUTTON MODE</span>
+            <div class="pill-group">
+              ${modes
+                .map(
+                  (m) =>
+                    `<button type="button" class="pill-opt${bMode === m ? ' is-selected' : ''}" data-button-mode="${m}">${m}</button>`
+                )
+                .join('')}
+            </div>
+          </div>
+          <button type="button" class="switch-action-pill${device.is_on ? ' is-active' : ''}" data-switch-pill>
+            ${device.is_on ? 'STATE: ON — PRESS TO TURN OFF' : 'STATE: OFF — PRESS TO ACTIVATE'}
+          </button>
+        </div>
+      `;
+    }
+
+    // Security / Energy / Generic
+    if (typeof device.level === 'number') {
+      return `
+        <div class="device-controls">
+          <div class="device-slider-wrap">
+            <div class="control-caption">
+              <span>${kind === 'energy' ? 'RESERVE / OUTPUT' : 'OUTPUT LEVEL'}</span>
+              <span class="device-level-val">${device.level}${device.unit ?? '%'}</span>
+            </div>
+            <input type="range" min="0" max="100" value="${device.level}" class="lh-slider" data-slider="level" ${!device.is_on ? 'disabled' : ''} />
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
+  }
+
+  function renderDevices() {
+    if (!devicesGrid) return;
+    devicesGrid.innerHTML = '';
+
+    const filtered =
+      activeRoom === 'all' ? state.devices : state.devices.filter((d) => d.room_id === activeRoom);
+
+    if (deviceCountLabel) {
+      deviceCountLabel.textContent = `${filtered.length} ${filtered.length === 1 ? 'NODE' : 'NODES'}`;
+    }
+
+    for (const device of filtered) {
+      const kind = device.kind.toLowerCase();
+      const card = document.createElement('article');
+      card.className = `device-card${device.is_on ? ' is-on' : ''}`;
+      card.setAttribute('data-device-id', device.id);
+
+      const statusLabel =
+        kind === 'security' ? (device.is_on ? 'LOCKED' : 'UNLOCKED') : device.is_on ? 'ACTIVE' : 'STANDBY';
+
+      card.innerHTML = `
+        <div class="device-top">
+          <div class="device-identity">
+            <div class="device-icon-badge">${getDeviceIconSvg(kind)}</div>
+            <div class="device-meta">
+              <span class="device-kind">${kind} · ${getRoomName(device.room_id)}</span>
+              <h3 class="device-name">${device.name}</h3>
+            </div>
+          </div>
+          <div class="device-top-actions">
+            <button type="button" class="icon-trash-btn" data-delete-device aria-label="Delete ${device.name}" title="Remove device">
+              ${TRASH_ICON_SVG}
+            </button>
+            <button
+              type="button"
+              class="device-toggle"
+              aria-label="Toggle ${device.name}"
+              aria-pressed="${device.is_on ? 'true' : 'false'}"
+            ></button>
+          </div>
+        </div>
+        ${buildDedicatedControls(device)}
+        <div class="device-bottom">
+          <span class="device-status-text">${statusLabel}</span>
+          <span>${device.is_on ? device.power_watts : 0} W</span>
+        </div>
+      `;
+
+      const handleToggle = async () => {
+        const prev = { ...device };
+        const optimistic = { ...device, is_on: !device.is_on };
+        updateLocalDevice(optimistic);
+
+        if (isLive) {
+          try {
+            const updated = await toggleDevice(device.id);
+            updateLocalDevice(updated);
+            await syncOverviewQuietly();
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        } else {
+          evaluateLocalAutomations(prev, optimistic);
+          recomputeLocalMetrics();
+          renderAll();
+        }
+      };
+
+      card.querySelector('.device-toggle')?.addEventListener('click', handleToggle);
+      card.querySelector('[data-switch-pill]')?.addEventListener('click', handleToggle);
+
+      card.querySelector('[data-delete-device]')?.addEventListener('click', async () => {
+        if (isLive) {
+          try {
+            await deleteDevice(device.id);
+            await syncOverviewQuietly();
+            return;
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        }
+        state.devices = state.devices.filter((d) => d.id !== device.id);
+        recomputeLocalMetrics();
+        renderAll();
+      });
+
+      // Climate steppers
+      card.querySelectorAll<HTMLButtonElement>('[data-temp-delta]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const delta = Number(btn.getAttribute('data-temp-delta') || 0);
+          const current = Math.round(device.temperature_c ?? 22);
+          const nextTemp = Math.min(30, Math.max(16, current + delta));
+          patchAndSync(device, { temperature_c: nextTemp });
+        });
+      });
+
+      card.querySelectorAll<HTMLButtonElement>('[data-climate-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-climate-mode') || 'cool';
+          patchAndSync(device, { climate_mode: mode });
+        });
+      });
+
+      card.querySelectorAll<HTMLButtonElement>('[data-fan-speed]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const fan = btn.getAttribute('data-fan-speed') || 'medium';
+          patchAndSync(device, { fan_speed: fan });
+        });
+      });
+
+      // Lighting Kelvin presets
+      card.querySelectorAll<HTMLButtonElement>('[data-kelvin-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const kelvin = Number(btn.getAttribute('data-kelvin-preset') || 3400);
+          patchAndSync(device, { color_temp_k: kelvin });
+        });
+      });
+
+      // Switch button mode
+      card.querySelectorAll<HTMLButtonElement>('[data-button-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const bMode = btn.getAttribute('data-button-mode') || 'toggle';
+          patchAndSync(device, { button_mode: bMode });
+        });
+      });
+
+      // Level slider
+      const levelSlider = card.querySelector<HTMLInputElement>('input[data-slider="level"]');
+      const levelDisplay = card.querySelector<HTMLElement>('.device-level-val');
+      if (levelSlider) {
+        levelSlider.addEventListener('input', () => {
+          const val = Number(levelSlider.value);
+          if (levelDisplay) levelDisplay.textContent = `${val}${device.unit ?? '%'}`;
+          const key = `${device.id}-level`;
+          const existing = sliderTimers.get(key);
+          if (existing) window.clearTimeout(existing);
+          sliderTimers.set(
+            key,
+            window.setTimeout(() => patchAndSync(device, { level: val }), 140)
+          );
+        });
+      }
+
+      // Kelvin slider
+      const kelvinSlider = card.querySelector<HTMLInputElement>('input[data-slider="kelvin"]');
+      const kelvinDisplay = card.querySelector<HTMLElement>('.device-kelvin-val');
+      if (kelvinSlider) {
+        kelvinSlider.addEventListener('input', () => {
+          const val = Number(kelvinSlider.value);
+          if (kelvinDisplay) kelvinDisplay.textContent = `${val}K`;
+          const key = `${device.id}-kelvin`;
+          const existing = sliderTimers.get(key);
+          if (existing) window.clearTimeout(existing);
+          sliderTimers.set(
+            key,
+            window.setTimeout(() => patchAndSync(device, { color_temp_k: val }), 140)
+          );
+        });
+      }
+
+      devicesGrid.appendChild(card);
+    }
+  }
+
+  function renderAutomations() {
+    if (!automationsGrid) return;
+    const rules = state.automations ?? [];
+    automationsGrid.innerHTML = '';
+
+    if (automationCountLabel) {
+      automationCountLabel.textContent = `${rules.length} ${rules.length === 1 ? 'RULE' : 'RULES'}`;
+    }
+
+    for (const rule of rules) {
+      const card = document.createElement('article');
+      card.className = 'auto-card';
+      const condText = rule.trigger_condition.replace(/_/g, ' ');
+      const thresholdText =
+        typeof rule.trigger_value === 'number' ? ` (${rule.trigger_value})` : '';
+
+      card.innerHTML = `
+        <div class="auto-card-top">
+          <h4 class="auto-name">${rule.name}</h4>
+          <button
+            type="button"
+            class="device-toggle"
+            aria-label="Toggle rule ${rule.name}"
+            aria-pressed="${rule.enabled ? 'true' : 'false'}"
+          ></button>
+        </div>
+        <div class="auto-flow">
+          <div class="auto-chip-row">
+            <span class="auto-badge">IF</span>
+            <span>${getDeviceName(rule.trigger_device_id)}</span>
+            <span class="auto-action-tag">${condText}${thresholdText}</span>
+          </div>
+          <div class="auto-chip-row">
+            <span class="auto-badge">THEN</span>
+            ${rule.actions
+              .map(
+                (a) =>
+                  `<span class="auto-action-tag">${getDeviceName(a.target_device_id)} → ${a.action.replace(/_/g, ' ')}${typeof a.value === 'number' ? ` (${a.value})` : ''}</span>`
+              )
+              .join('')}
+          </div>
+        </div>
+        <div class="auto-card-footer">
+          <button type="button" class="pill-btn" data-run-rule>
+            ${PLAY_ICON_SVG} Test Run
+          </button>
+          <button type="button" class="icon-trash-btn" data-delete-rule aria-label="Delete rule ${rule.name}">
+            ${TRASH_ICON_SVG}
+          </button>
+        </div>
+      `;
+
+      card.querySelector('.device-toggle')?.addEventListener('click', async () => {
+        if (isLive) {
+          try {
+            await toggleAutomation(rule.id);
+            await syncOverviewQuietly();
+            return;
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        }
+        state.automations = (state.automations ?? []).map((r) =>
+          r.id === rule.id ? { ...r, enabled: !r.enabled } : r
+        );
+        renderAutomations();
+      });
+
+      card.querySelector('[data-run-rule]')?.addEventListener('click', async () => {
+        if (isLive) {
+          try {
+            state = await runAutomation(rule.id);
+            renderAll();
+            return;
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        }
+        applyRuleActionsLocally(rule.actions);
+        recomputeLocalMetrics();
+        renderAll();
+      });
+
+      card.querySelector('[data-delete-rule]')?.addEventListener('click', async () => {
+        if (isLive) {
+          try {
+            await deleteAutomation(rule.id);
+            await syncOverviewQuietly();
+            return;
+          } catch {
+            isLive = false;
+            updateConnectionUI();
+          }
+        }
+        state.automations = (state.automations ?? []).filter((r) => r.id !== rule.id);
+        renderAutomations();
+      });
+
+      automationsGrid.appendChild(card);
+    }
+  }
+
+  function updateLocalDevice(updated: Device) {
+    state.devices = state.devices.map((d) => (d.id === updated.id ? updated : d));
+    recomputeLocalMetrics();
+    renderMetrics();
+    renderDevices();
+  }
+
+  function updateConnectionUI() {
+    if (modePill) {
+      modePill.setAttribute('data-mode', isLive ? 'live' : 'offline');
+      modePill.textContent = isLive ? 'LIVE RUST CORE' : 'OFFLINE DEMO';
+    }
+    if (offlineBanner) {
+      offlineBanner.hidden = isLive;
+    }
+  }
+
+  function renderAll() {
+    updateConnectionUI();
+    renderMetrics();
+    renderScenes();
+    renderRooms();
+    renderDevices();
+    renderAutomations();
+  }
+
+  async function syncOverviewQuietly() {
+    try {
+      state = await fetchOverview();
+      isLive = true;
+    } catch {
+      isLive = false;
+    }
+    renderAll();
+  }
+
+  async function loadOverview() {
+    if (modePill) modePill.textContent = 'SYNCING...';
+    await syncOverviewQuietly();
+  }
+
+  // Modal helpers
+  function openModal(id: string) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = false;
+  }
+
+  function closeModal(id: string) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = true;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-close-modal]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-close-modal');
+      if (target) closeModal(target);
+    });
+  });
+
+  // Add Device Modal logic
+  const devKindSelect = document.getElementById('dev-kind-select') as HTMLSelectElement | null;
+  const devRoomSelect = document.getElementById('dev-room-select') as HTMLSelectElement | null;
+  const addDeviceForm = document.getElementById('add-device-form') as HTMLFormElement | null;
+
+  function syncDeviceTypeOptions() {
+    const kind = devKindSelect?.value ?? 'lighting';
+    const lightOpts = document.getElementById('dev-opts-lighting');
+    const climateOpts = document.getElementById('dev-opts-climate');
+    const switchOpts = document.getElementById('dev-opts-switch');
+    if (lightOpts) lightOpts.hidden = kind !== 'lighting';
+    if (climateOpts) climateOpts.hidden = kind !== 'climate';
+    if (switchOpts) switchOpts.hidden = kind !== 'switch';
+  }
+
+  devKindSelect?.addEventListener('change', syncDeviceTypeOptions);
+
+  document.getElementById('open-add-device-btn')?.addEventListener('click', () => {
+    if (devRoomSelect) {
+      devRoomSelect.innerHTML = state.rooms
+        .map((r) => `<option value="${r.id}">${r.name}</option>`)
+        .join('');
+    }
+    syncDeviceTypeOptions();
+    openModal('add-device-modal');
+  });
+
+  addDeviceForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('dev-name-input') as HTMLInputElement).value.trim();
+    const room_id = (document.getElementById('dev-room-select') as HTMLSelectElement).value;
+    const kind = (document.getElementById('dev-kind-select') as HTMLSelectElement).value;
+
+    const payload: CreateDeviceRequest = { name, room_id, kind };
+    if (kind === 'lighting') {
+      payload.level = Number((document.getElementById('dev-light-level') as HTMLInputElement).value || 80);
+      payload.color_temp_k = Number((document.getElementById('dev-light-kelvin') as HTMLInputElement).value || 3500);
+    } else if (kind === 'climate') {
+      payload.temperature_c = Number((document.getElementById('dev-climate-temp') as HTMLInputElement).value || 22);
+      payload.climate_mode = (document.getElementById('dev-climate-mode') as HTMLSelectElement).value;
+      payload.fan_speed = (document.getElementById('dev-climate-fan') as HTMLSelectElement).value;
+    } else if (kind === 'switch') {
+      payload.button_mode = (document.getElementById('dev-switch-mode') as HTMLSelectElement).value;
+    }
+
+    if (isLive) {
+      try {
+        await createDevice(payload);
+        await syncOverviewQuietly();
+        addDeviceForm.reset();
+        closeModal('add-device-modal');
+        return;
+      } catch {
+        isLive = false;
+        updateConnectionUI();
+      }
+    }
+
+    const demoDevice: Device = {
+      id: `demo-${Date.now()}`,
+      name: payload.name,
+      room_id: payload.room_id,
+      kind: payload.kind,
+      is_on: true,
+      level: payload.level ?? null,
+      power_watts: payload.kind === 'climate' ? 95 : 18,
+      temperature_c: payload.temperature_c ?? null,
+      climate_mode: payload.climate_mode ?? null,
+      fan_speed: payload.fan_speed ?? null,
+      color_temp_k: payload.color_temp_k ?? null,
+      button_mode: payload.button_mode ?? null,
+    };
+    state.devices = [...state.devices, demoDevice];
+    recomputeLocalMetrics();
+    renderAll();
+    addDeviceForm.reset();
+    closeModal('add-device-modal');
+  });
+
+  // New Automation Modal logic
+  const autoTriggerDevice = document.getElementById('auto-trigger-device') as HTMLSelectElement | null;
+  const autoTriggerCond = document.getElementById('auto-trigger-cond') as HTMLSelectElement | null;
+  const autoTriggerValWrap = document.getElementById('auto-trigger-val-wrap');
+  const autoActionsContainer = document.getElementById('auto-actions-container');
+  const addAutomationForm = document.getElementById('add-automation-form') as HTMLFormElement | null;
+
+  autoTriggerCond?.addEventListener('change', () => {
+    const cond = autoTriggerCond.value;
+    if (autoTriggerValWrap) {
+      autoTriggerValWrap.hidden = cond !== 'level_above' && cond !== 'temp_above';
+    }
+  });
+
+  function appendActionRow() {
+    if (!autoActionsContainer) return;
+    const row = document.createElement('div');
+    row.className = 'action-builder-row';
+    const devOpts = state.devices.map((d) => `<option value="${d.id}">${d.name}</option>`).join('');
+    row.innerHTML = `
+      <select class="form-select" data-act-target>${devOpts}</select>
+      <select class="form-select" data-act-type>
+        <option value="turn_on">Turn ON</option>
+        <option value="turn_off">Turn OFF</option>
+        <option value="toggle">Toggle</option>
+        <option value="set_level">Set Level</option>
+        <option value="set_temp">Set Temp</option>
+      </select>
+      <input type="number" class="form-input" data-act-val placeholder="Val" style="width: 74px" hidden />
+      <button type="button" class="icon-trash-btn" data-remove-row aria-label="Remove action">${TRASH_ICON_SVG}</button>
+    `;
+
+    const actType = row.querySelector('[data-act-type]') as HTMLSelectElement;
+    const actVal = row.querySelector('[data-act-val]') as HTMLInputElement;
+    actType.addEventListener('change', () => {
+      actVal.hidden = actType.value !== 'set_level' && actType.value !== 'set_temp';
+    });
+    row.querySelector('[data-remove-row]')?.addEventListener('click', () => row.remove());
+    autoActionsContainer.appendChild(row);
+  }
+
+  document.getElementById('add-action-row-btn')?.addEventListener('click', appendActionRow);
+
+  document.getElementById('open-add-automation-btn')?.addEventListener('click', () => {
+    if (autoTriggerDevice) {
+      autoTriggerDevice.innerHTML = state.devices
+        .map((d) => `<option value="${d.id}">${d.name}</option>`)
+        .join('');
+    }
+    if (autoActionsContainer) {
+      autoActionsContainer.innerHTML = '';
+      appendActionRow();
+    }
+    openModal('add-automation-modal');
+  });
+
+  addAutomationForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('auto-name-input') as HTMLInputElement).value.trim();
+    const trigger_device_id = autoTriggerDevice?.value ?? '';
+    const trigger_condition = autoTriggerCond?.value ?? 'turns_on';
+    const triggerValEl = document.getElementById('auto-trigger-val') as HTMLInputElement;
+    const needsTriggerVal = trigger_condition === 'level_above' || trigger_condition === 'temp_above';
+    const trigger_value = needsTriggerVal ? Number(triggerValEl.value || 50) : undefined;
+
+    const actions: RuleAction[] = [];
+    autoActionsContainer?.querySelectorAll('.action-builder-row').forEach((row) => {
+      const target_device_id = (row.querySelector('[data-act-target]') as HTMLSelectElement).value;
+      const action = (row.querySelector('[data-act-type]') as HTMLSelectElement).value;
+      const valInput = row.querySelector('[data-act-val]') as HTMLInputElement;
+      const value = !valInput.hidden && valInput.value !== '' ? Number(valInput.value) : undefined;
+      actions.push({ target_device_id, action, value });
+    });
+
+    if (actions.length === 0) return;
+
+    if (isLive) {
+      try {
+        await createAutomation({ name, trigger_device_id, trigger_condition, trigger_value, actions });
+        await syncOverviewQuietly();
+        addAutomationForm.reset();
+        closeModal('add-automation-modal');
+        return;
+      } catch {
+        isLive = false;
+        updateConnectionUI();
+      }
+    }
+
+    const demoRule: AutomationRule = {
+      id: `demo-rule-${Date.now()}`,
+      name,
+      enabled: true,
+      trigger_device_id,
+      trigger_condition,
+      trigger_value,
+      actions,
+    };
+    state.automations = [...(state.automations ?? []), demoRule];
+    renderAutomations();
+    addAutomationForm.reset();
+    closeModal('add-automation-modal');
+  });
+
+  document.getElementById('refresh-overview-btn')?.addEventListener('click', loadOverview);
+  document.getElementById('retry-connect-btn')?.addEventListener('click', loadOverview);
+
+  loadOverview();
+</script>

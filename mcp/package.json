@@ -1,0 +1,26 @@
+{
+  "name": "linkhaus-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for LinkHaus by Helios Smart Systems",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "linkhaus-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
